@@ -1,0 +1,84 @@
+openapi: 3.1.0
+info:
+  title: Vements REST API
+  version: 1.0.3
+  summary: Vements REST API
+  description: |
+    This specification describes the Vements REST API, its endpoints, and 
+    the data structures used to communicate with it.
+  x-namespace:
+  - vements
+  x-subtitle: Achievements and scoreboards for everyone
+
+  termsOfService: https://vements.io/terms
+
+  contact:
+    name: Vements Support Contact
+    url: https://vements.io
+    email: support@vements.io
+
+  license:
+    name: MIT
+    url: https://opensource.org/license/mit/
+
+
+externalDocs:
+  description: Vements REST API Documentation
+  url: https://vements.io/docs
+
+servers:
+- url: https://a.vements.io/{basePath}
+  description: Production Server
+  variables:
+    basePath:
+      default: api/rest/v1.0.3/
+  x-tags:
+    - production
+
+
+- url: http://api.localtest.me/{basePath}
+  description: Development Server (Host)
+  variables:
+    basePath:
+      default: api/rest/v1.0.3/
+  x-tags:
+    - development
+    - host
+    - full
+
+- url: http://localhost:9000/{basePath}
+  description: Development Server (Host Substitute)
+  variables:
+    basePath:
+      default: api/rest/v1.0.3/
+  x-tags:
+    - development
+    - host
+    - substitute
+
+
+- url: http://api-server-a:8080/{basePath}
+  description: Development Server (Container)
+  variables:
+    basePath:
+      default: api/rest/v1.0.3/
+  x-tags:
+    - development
+    - container
+    - full
+
+
+- url: http://substitute-server:9000/{basePath}
+  description: Development Server (Container Substitute)
+  variables:
+    basePath:
+      default: api/rest/v1.0.3/
+  x-tags:
+    - development
+    - container
+    - substitute
+
+security:
+  - ApiKeyAuth:
+    - read
+    - write

@@ -1,0 +1,181 @@
+paths:
+  # Paths that are not easily derived from the resource types.
+
+  ## Read achievement leaderboard
+  /achievement/{achievement_id}/leaderboard:
+    get:
+      tags:
+        - achievement
+      summary: Achievement leaderboard
+      description: >
+        Reads and returns achievement leaderboard
+      operationId: achievement_leaderboard
+      parameters:
+        - name: achievement_id
+          in: path
+          description: Achievement ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Read achievement leaderboard successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchievementLeaderboardResponse'
+
+  ## Record achievement progress
+  /achievement/{achievement_id}/progress:
+    put:
+      tags:
+        - achievement
+      summary: Record achievement progress
+      description: >
+        Records and returns achievement progress
+      operationId: achievement_record
+      parameters:
+        - name: achievement_id
+          in: path
+          description: Achievement ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Achievement progress
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AchievementProgressRequest'
+      responses:
+        '200':
+          description: Record achievement progress successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchievementProgressResponse'
+
+  ## List participant progress
+  /participant/{participant_id}/progress:
+    get:
+      tags:
+        - participant
+      summary: Participant progress
+      description: >
+        Reads and returns participant progress.
+      operationId: participant_progress
+      parameters:
+        - name: participant_id
+          in: path
+          description: Participant ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Read participant progress successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantProgressResponse'
+
+
+  ## List participant scores
+  /participant/{participant_id}/scores:
+    get:
+      tags:
+        - participant
+      summary: Participant scores
+      description: >
+        Reads and returns participant scores.
+      operationId: participant_scores
+      parameters:
+        - name: participant_id
+          in: path
+          description: Participant ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Read participant scores successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantScoresResponse'
+
+  ## Record scoreboard score
+  /scoreboard/{scoreboard_id}/score:
+    put:
+      tags:
+        - scoreboard
+      summary: Record a scoreboard score
+      description: >
+        Records and returns a scoreboard score.
+      operationId: scoreboard_record
+      parameters:
+        - name: scoreboard_id
+          in: path
+          description: Scoreboard ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Scoreboard score
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScoreboardScoreRequest'
+      responses:
+        '200':
+          description: Record score successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreboardScoreResponse'
+
+  ## Read scoreboard scores
+  /scoreboard/{scoreboard_id}/scores:
+    get:
+      tags:
+        - scoreboard
+      summary: Scoreboard scores
+      description: >
+        Reads and returns scoreboard scores
+      operationId: scoreboard_scores
+      parameters:
+        - name: scoreboard_id
+          in: path
+          description: Scoreboard ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: from
+          in: query
+          description: From
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: To
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Read scoreboard scores successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreboardScoresResponse'

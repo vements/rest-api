@@ -1,0 +1,642 @@
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  schemas:
+    User:
+      description: >
+        Represents an interactive user account.
+        A user may have one or more projects.
+        This resource type is not available via the API.
+      type: object
+      properties:
+
+        user_id:
+          type: string
+          description: User ID
+          x-tags:
+          - read-only
+
+        email:
+          type: string
+          description: User email address
+          format: email
+
+        display:
+          type: string
+          description: User display name
+          minLength: 1
+          maxLength: 255
+
+        db:
+          type: string
+          description: User database name
+
+        created:
+          type: string
+          format: date-time
+          description: Date and time of creation
+          x-default: now()
+          x-tags:
+          - read-only
+
+        updated:
+          type: string
+          description: Date and time of last update
+          format: date-time
+          x-default: now()
+          x-tags:
+          - read-only
+
+        deleted:
+          type: string
+          description: Date and time of deletion
+          format: date-time
+          nullable: true 
+          x-tags:
+          - read-only
+
+    Project:
+      description: >
+        Represents a user project.
+        This resource type is not available via the API.
+      type: object
+      properties:
+
+        project_id: 
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Project ID
+          x-tags:
+          - read-only
+
+        user_id:
+          type: string
+          description: Related user ID
+          x-tags: 
+          - write-once
+
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Project display name
+
+        created:
+          type: string
+          format: date-time
+          description: Date and time of creation
+          x-default: now()
+          x-tags:
+          - read-only
+
+        updated:
+          type: string
+          format: date-time
+          description: Date and time of last update
+          x-default: now()
+          x-tags:
+          - read-only
+
+        deleted:
+          type: string
+          format: date-time
+          nullable: true 
+          description: Date and time of deletion
+          x-tags:
+          - read-only
+
+        extra:
+          type: object
+          nullable: true
+          description: Arbitrary application data
+
+    ApiKey:
+      description: >
+        Represents a project API key.
+        This resource type is not available via the API.
+      type: object
+      properties:
+
+        api_key_id:
+          type: string
+          minLength: 36
+          maxLength: 36
+          description: API Key ID
+          x-tags:
+          - read-only
+
+        project_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related project ID
+          x-tags: 
+          - write-once
+
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: API Key display name
+
+        capability:
+          type: string
+          enum:
+            - r
+            - rw
+          description: API Key capability
+
+        deactivated:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time of most recent deactivation
+
+        last_used:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time of most recent use
+          x-tags:
+          - read-only
+
+        created:
+          type: string
+          format: date-time
+          description: Date and time of creation
+          x-default: now()
+          x-tags:
+          - read-only
+
+        updated:
+          type: string
+          format: date-time
+          description: Date and time of last update
+          x-default: now()
+          x-tags:
+          - read-only
+
+        deleted:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time of deletion
+          x-tags:
+          - read-only
+
+    Achievement:
+      description: >
+        Represents a project achievement definition.
+      type: object
+      x-resource-name: achievement
+
+      properties:
+        achievement_id:
+          type: string
+          format: ulid
+          default: gen_ulid()
+          minLength: 26
+          maxLength: 26
+          description: Achievement ID
+          x-tags:
+          - read-only
+
+        project_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related project ID
+          x-tags: 
+          - write-once
+
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Achievement display name
+
+        goal:
+          type: integer
+          minimum: 1
+          description: Achievement goal
+
+        repeats:
+          type: integer
+          minimum: 0
+          description: Achievement repeats; zero for unlimited
+
+        locked_image:
+          type: string
+          nullable: true
+          description: Achievement locked or non-obtained image
+
+        unlocked_image:
+          type: string
+          nullable: true
+          description: Achievement unlocked or obtained image
+
+        position:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Achievement position within project
+
+        public:
+          type: boolean
+          default: false
+          description: Achievement public flag
+
+        created:
+          type: string
+          format: date-time
+          description: Date and time of creation
+          x-default: now()
+          x-tags:
+          - read-only
+
+        updated:
+          type: string
+          format: date-time
+          description: Date and time of last update
+          x-default: now()
+          x-tags:
+          - read-only
+
+        deleted:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time of deletion
+          x-tags:
+          - read-only
+
+        extra:
+          type: object
+          nullable: true
+          description: Arbitrary application data
+
+    Participant:
+      description: >
+        Represents a project participant definition.
+      type: object
+      x-resource-name: participant
+      properties:
+
+        participant_id:
+          type: string
+          format: ulid
+          default: gen_ulid()
+          minLength: 26
+          maxLength: 26
+          description: Participant ID
+          x-tags:
+          - read-only
+
+        project_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related project ID
+          x-tags: 
+          - write-once
+
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Participant display name
+
+        external_id:
+          type: string
+          description: Participant external ID
+
+        image:
+          type: string 
+          nullable: true
+          description: Participant image
+
+        created:
+          type: string
+          format: date-time
+          description: Date and time of creation
+          x-default: now()
+          x-tags:
+          - read-only
+
+        updated:
+          type: string
+          format: date-time
+          description: Date and time of last update
+          x-default: now()
+          x-tags:
+          - read-only
+
+        deleted:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time of deletion
+          x-tags:
+          - read-only
+
+        extra:
+          type: object
+          nullable: true
+          description: Arbitrary application data
+
+    Scoreboard:
+      description: >
+        Represents a project scoreboard definition.
+      type: object
+      x-resource-name: scoreboard
+      properties:
+
+        scoreboard_id:
+          type: string
+          format: ulid
+          default: gen_ulid()
+          minLength: 26
+          maxLength: 26
+          description: Scoreboard ID
+          x-tags:
+          - read-only
+
+        project_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related project ID
+          x-tags: 
+          - write-once
+
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Scoreboard display name
+
+        rank_dir:
+          type: string
+          enum:
+            - asc
+            - desc
+          description: Scoreboard rank direction
+
+        public:
+          type: boolean
+          default: false
+          description: Scoreboard public flag
+
+        created:
+          type: string
+          format: date-time
+          description: Date and time of creation
+          x-default: now()
+          x-tags:
+          - read-only
+
+        updated:
+          type: string
+          format: date-time
+          description: Date and time of last update
+          x-default: now()
+          x-tags:
+          - read-only
+
+        deleted:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time of deletion
+          x-tags:
+          - read-only
+
+        extra:
+          type: object
+          description: Arbitrary application data
+          nullable: true 
+
+    Progress:
+      description: >
+        Represents an achievement progress record.
+      type: object
+      properties:
+
+        progress_id:
+          type: integer
+          description: Progress ID
+          x-tags:
+          - read-only
+
+        achievement_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related achievement ID
+          x-tags: 
+          - write-once
+
+        participant_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related participant ID
+          x-tags: 
+          - write-once
+
+        value:
+          type: integer
+          description: Progress value
+
+        recorded:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time progress recorded
+          x-default: now()
+          x-tags:
+          - write-once
+
+    Score:
+      description: >
+        Represents a scoreboard score record.
+      type: object
+      properties:
+
+        score_id:
+          type: integer
+          description: Score ID
+          x-tags:
+          - read-only
+
+        scoreboard_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related scoreboard ID
+          x-tags: 
+          - write-once
+
+        participant_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related participant ID
+          x-tags: 
+          - write-once
+
+        value:
+          type: integer
+          description: Score value
+
+        recorded:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time score recorded
+          x-default: now()
+          x-tags:
+          - write-once
+
+    AchievementLeaderboardItem:
+      type: object
+      properties:
+        participant:
+          type: object
+          $ref: '#/components/schemas/Participant'
+        progress:
+          type: integer
+        iterations:
+          type: integer
+
+    ParticipantProgressItem:
+      type: object
+      properties:
+        achievement:
+          type: object
+          $ref: '#/components/schemas/Achievement'
+        progress:
+          type: integer
+        iterations:
+          type: integer
+
+    ParticipantScoreItem:
+      type: object
+      properties:
+        scoreboard:
+          type: object
+          $ref: '#/components/schemas/Scoreboard'
+        rank:
+          type: integer
+        total:
+          type: integer
+
+    ScoreboardScoreItem:
+      type: object
+      properties:
+        participant_id:
+          type: string
+          format: ulid
+        participant:
+          type: object
+          $ref: '#/components/schemas/Participant'
+        rank:
+          type: integer
+        total:
+          type: integer
+
+    AchievementLeaderboardResponse:
+      type: object
+      properties:
+        achievement_leaderboard:
+          type: array
+          items:
+            $ref : '#/components/schemas/AchievementLeaderboardItem'
+
+    AchievementProgressResponse:
+      type: object
+      properties:
+        insert_progress_one:
+          type: object
+          $ref: '#/components/schemas/Progress'
+
+    ParticipantProgressResponse:
+      type: object
+      properties:
+        participant_progress:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantProgressItem'
+
+    ParticipantScoresResponse:
+      type: object
+      properties:
+        participant_scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantScoreItem'
+
+    ScoreboardScoreResponse:
+      type: object
+      properties:
+        insert_score_one:
+          type: object
+          $ref: '#/components/schemas/Score'
+
+    ScoreboardScoresResponse:
+      type: object
+      properties:
+        scoreboard_scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScoreboardScoreItem'
+    
+    AchievementProgressRequest:
+      type: object
+      properties:
+        participant_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Participant ID
+        value:
+          type: integer
+          description: Progress value
+        recorded:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time progress recorded
+
+    ScoreboardScoreRequest:
+      type: object
+      properties:
+        participant_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Participant ID
+        value:
+          type: integer
+          description: Score value
+        recorded:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time score recorded

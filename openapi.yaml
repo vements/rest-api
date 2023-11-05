@@ -1,0 +1,1654 @@
+openapi: 3.1.0
+info:
+  title: Vements REST API
+  version: 1.0.3
+  summary: Vements REST API
+  description: |
+    This specification describes the Vements REST API, its endpoints, and 
+    the data structures used to communicate with it.
+  x-namespace:
+  - vements
+  x-subtitle: Achievements and scoreboards for everyone
+
+  termsOfService: https://vements.io/terms
+
+  contact:
+    name: Vements Support Contact
+    url: https://vements.io
+    email: support@vements.io
+
+  license:
+    name: MIT
+    url: https://opensource.org/license/mit/
+
+
+externalDocs:
+  description: Vements REST API Documentation
+  url: https://vements.io/docs
+
+servers:
+- url: https://a.vements.io/{basePath}
+  description: Production Server
+  variables:
+    basePath:
+      default: api/rest/v1.0.3/
+  x-tags:
+  - production
+
+
+- url: http://api.localtest.me/{basePath}
+  description: Development Server (Host)
+  variables:
+    basePath:
+      default: api/rest/v1.0.3/
+  x-tags:
+  - development
+  - host
+  - full
+
+- url: http://localhost:9000/{basePath}
+  description: Development Server (Host Substitute)
+  variables:
+    basePath:
+      default: api/rest/v1.0.3/
+  x-tags:
+  - development
+  - host
+  - substitute
+
+
+- url: http://api-server-a:8080/{basePath}
+  description: Development Server (Container)
+  variables:
+    basePath:
+      default: api/rest/v1.0.3/
+  x-tags:
+  - development
+  - container
+  - full
+
+
+- url: http://substitute-server:9000/{basePath}
+  description: Development Server (Container Substitute)
+  variables:
+    basePath:
+      default: api/rest/v1.0.3/
+  x-tags:
+  - development
+  - container
+  - substitute
+
+security:
+- ApiKeyAuth:
+  - read
+  - write
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  schemas:
+    User:
+      description: >
+        Represents an interactive user account.
+        A user may have one or more projects.
+        This resource type is not available via the API.
+      type: object
+      properties:
+
+        user_id:
+          type: string
+          description: User ID
+          x-tags:
+          - read-only
+
+        email:
+          type: string
+          description: User email address
+          format: email
+
+        display:
+          type: string
+          description: User display name
+          minLength: 1
+          maxLength: 255
+
+        db:
+          type: string
+          description: User database name
+
+        created:
+          type: string
+          format: date-time
+          description: Date and time of creation
+          x-default: now()
+          x-tags:
+          - read-only
+
+        updated:
+          type: string
+          description: Date and time of last update
+          format: date-time
+          x-default: now()
+          x-tags:
+          - read-only
+
+        deleted:
+          type: string
+          description: Date and time of deletion
+          format: date-time
+          nullable: true
+          x-tags:
+          - read-only
+
+    Project:
+      description: >
+        Represents a user project.
+        This resource type is not available via the API.
+      type: object
+      properties:
+
+        project_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Project ID
+          x-tags:
+          - read-only
+
+        user_id:
+          type: string
+          description: Related user ID
+          x-tags:
+          - write-once
+
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Project display name
+
+        created:
+          type: string
+          format: date-time
+          description: Date and time of creation
+          x-default: now()
+          x-tags:
+          - read-only
+
+        updated:
+          type: string
+          format: date-time
+          description: Date and time of last update
+          x-default: now()
+          x-tags:
+          - read-only
+
+        deleted:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time of deletion
+          x-tags:
+          - read-only
+
+        extra:
+          type: object
+          nullable: true
+          description: Arbitrary application data
+
+    ApiKey:
+      description: >
+        Represents a project API key.
+        This resource type is not available via the API.
+      type: object
+      properties:
+
+        api_key_id:
+          type: string
+          minLength: 36
+          maxLength: 36
+          description: API Key ID
+          x-tags:
+          - read-only
+
+        project_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related project ID
+          x-tags:
+          - write-once
+
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: API Key display name
+
+        capability:
+          type: string
+          enum:
+          - r
+          - rw
+          description: API Key capability
+
+        deactivated:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time of most recent deactivation
+
+        last_used:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time of most recent use
+          x-tags:
+          - read-only
+
+        created:
+          type: string
+          format: date-time
+          description: Date and time of creation
+          x-default: now()
+          x-tags:
+          - read-only
+
+        updated:
+          type: string
+          format: date-time
+          description: Date and time of last update
+          x-default: now()
+          x-tags:
+          - read-only
+
+        deleted:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time of deletion
+          x-tags:
+          - read-only
+
+    Achievement:
+      description: >
+        Represents a project achievement definition.
+      type: object
+      x-resource-name: achievement
+
+      properties:
+        achievement_id:
+          type: string
+          format: ulid
+          default: gen_ulid()
+          minLength: 26
+          maxLength: 26
+          description: Achievement ID
+          x-tags:
+          - read-only
+
+        project_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related project ID
+          x-tags:
+          - write-once
+
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Achievement display name
+
+        goal:
+          type: integer
+          minimum: 1
+          description: Achievement goal
+
+        repeats:
+          type: integer
+          minimum: 0
+          description: Achievement repeats; zero for unlimited
+
+        locked_image:
+          type: string
+          nullable: true
+          description: Achievement locked or non-obtained image
+
+        unlocked_image:
+          type: string
+          nullable: true
+          description: Achievement unlocked or obtained image
+
+        position:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Achievement position within project
+
+        public:
+          type: boolean
+          default: false
+          description: Achievement public flag
+
+        created:
+          type: string
+          format: date-time
+          description: Date and time of creation
+          x-default: now()
+          x-tags:
+          - read-only
+
+        updated:
+          type: string
+          format: date-time
+          description: Date and time of last update
+          x-default: now()
+          x-tags:
+          - read-only
+
+        deleted:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time of deletion
+          x-tags:
+          - read-only
+
+        extra:
+          type: object
+          nullable: true
+          description: Arbitrary application data
+
+    Participant:
+      description: >
+        Represents a project participant definition.
+      type: object
+      x-resource-name: participant
+      properties:
+
+        participant_id:
+          type: string
+          format: ulid
+          default: gen_ulid()
+          minLength: 26
+          maxLength: 26
+          description: Participant ID
+          x-tags:
+          - read-only
+
+        project_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related project ID
+          x-tags:
+          - write-once
+
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Participant display name
+
+        external_id:
+          type: string
+          description: Participant external ID
+
+        image:
+          type: string
+          nullable: true
+          description: Participant image
+
+        created:
+          type: string
+          format: date-time
+          description: Date and time of creation
+          x-default: now()
+          x-tags:
+          - read-only
+
+        updated:
+          type: string
+          format: date-time
+          description: Date and time of last update
+          x-default: now()
+          x-tags:
+          - read-only
+
+        deleted:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time of deletion
+          x-tags:
+          - read-only
+
+        extra:
+          type: object
+          nullable: true
+          description: Arbitrary application data
+
+    Scoreboard:
+      description: >
+        Represents a project scoreboard definition.
+      type: object
+      x-resource-name: scoreboard
+      properties:
+
+        scoreboard_id:
+          type: string
+          format: ulid
+          default: gen_ulid()
+          minLength: 26
+          maxLength: 26
+          description: Scoreboard ID
+          x-tags:
+          - read-only
+
+        project_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related project ID
+          x-tags:
+          - write-once
+
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Scoreboard display name
+
+        rank_dir:
+          type: string
+          enum:
+          - asc
+          - desc
+          description: Scoreboard rank direction
+
+        public:
+          type: boolean
+          default: false
+          description: Scoreboard public flag
+
+        created:
+          type: string
+          format: date-time
+          description: Date and time of creation
+          x-default: now()
+          x-tags:
+          - read-only
+
+        updated:
+          type: string
+          format: date-time
+          description: Date and time of last update
+          x-default: now()
+          x-tags:
+          - read-only
+
+        deleted:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time of deletion
+          x-tags:
+          - read-only
+
+        extra:
+          type: object
+          description: Arbitrary application data
+          nullable: true
+
+    Progress:
+      description: >
+        Represents an achievement progress record.
+      type: object
+      properties:
+
+        progress_id:
+          type: integer
+          description: Progress ID
+          x-tags:
+          - read-only
+
+        achievement_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related achievement ID
+          x-tags:
+          - write-once
+
+        participant_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related participant ID
+          x-tags:
+          - write-once
+
+        value:
+          type: integer
+          description: Progress value
+
+        recorded:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time progress recorded
+          x-default: now()
+          x-tags:
+          - write-once
+
+    Score:
+      description: >
+        Represents a scoreboard score record.
+      type: object
+      properties:
+
+        score_id:
+          type: integer
+          description: Score ID
+          x-tags:
+          - read-only
+
+        scoreboard_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related scoreboard ID
+          x-tags:
+          - write-once
+
+        participant_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related participant ID
+          x-tags:
+          - write-once
+
+        value:
+          type: integer
+          description: Score value
+
+        recorded:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time score recorded
+          x-default: now()
+          x-tags:
+          - write-once
+
+    AchievementLeaderboardItem:
+      type: object
+      properties:
+        participant:
+          type: object
+          $ref: '#/components/schemas/Participant'
+        progress:
+          type: integer
+        iterations:
+          type: integer
+
+    ParticipantProgressItem:
+      type: object
+      properties:
+        achievement:
+          type: object
+          $ref: '#/components/schemas/Achievement'
+        progress:
+          type: integer
+        iterations:
+          type: integer
+
+    ParticipantScoreItem:
+      type: object
+      properties:
+        scoreboard:
+          type: object
+          $ref: '#/components/schemas/Scoreboard'
+        rank:
+          type: integer
+        total:
+          type: integer
+
+    ScoreboardScoreItem:
+      type: object
+      properties:
+        participant_id:
+          type: string
+          format: ulid
+        participant:
+          type: object
+          $ref: '#/components/schemas/Participant'
+        rank:
+          type: integer
+        total:
+          type: integer
+
+    AchievementLeaderboardResponse:
+      type: object
+      properties:
+        achievement_leaderboard:
+          type: array
+          items:
+            $ref: '#/components/schemas/AchievementLeaderboardItem'
+
+    AchievementProgressResponse:
+      type: object
+      properties:
+        insert_progress_one:
+          type: object
+          $ref: '#/components/schemas/Progress'
+
+    ParticipantProgressResponse:
+      type: object
+      properties:
+        participant_progress:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantProgressItem'
+
+    ParticipantScoresResponse:
+      type: object
+      properties:
+        participant_scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantScoreItem'
+
+    ScoreboardScoreResponse:
+      type: object
+      properties:
+        insert_score_one:
+          type: object
+          $ref: '#/components/schemas/Score'
+
+    ScoreboardScoresResponse:
+      type: object
+      properties:
+        scoreboard_scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScoreboardScoreItem'
+    AchievementProgressRequest:
+      type: object
+      properties:
+        participant_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Participant ID
+        value:
+          type: integer
+          description: Progress value
+        recorded:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time progress recorded
+
+    ScoreboardScoreRequest:
+      type: object
+      properties:
+        participant_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Participant ID
+        value:
+          type: integer
+          description: Score value
+        recorded:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time score recorded
+
+
+    # Types derived from base types
+
+    ## Derived Achievement create request
+    AchievementCreateRequest:
+      type: object
+      properties:
+        project_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related project ID
+          x-tags:
+          - write-once
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Achievement display name
+        goal:
+          type: integer
+          minimum: 1
+          description: Achievement goal
+        repeats:
+          type: integer
+          minimum: 0
+          description: Achievement repeats; zero for unlimited
+        locked_image:
+          type: string
+          nullable: true
+          description: Achievement locked or non-obtained image
+        unlocked_image:
+          type: string
+          nullable: true
+          description: Achievement unlocked or obtained image
+        position:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Achievement position within project
+        public:
+          type: boolean
+          default: false
+          description: Achievement public flag
+        extra:
+          type: object
+          nullable: true
+          description: Arbitrary application data
+
+    ## Derived Achievement create response
+    AchievementCreateResponse:
+      type: object
+      properties:
+        insert_achievement_one:
+          $ref: "#/components/schemas/Achievement"
+
+    ## (No "read request" or necessary for derived types)
+    ## Derived Achievement read response
+    AchievementReadResponse:
+      type: object
+      properties:
+        achievement:
+          type: array
+          items:
+            $ref: "#/components/schemas/Achievement"
+
+    ## Derived Achievement update request
+    AchievementUpdateRequest:
+      type: object
+      properties:
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Achievement display name
+        goal:
+          type: integer
+          minimum: 1
+          description: Achievement goal
+        repeats:
+          type: integer
+          minimum: 0
+          description: Achievement repeats; zero for unlimited
+        locked_image:
+          type: string
+          nullable: true
+          description: Achievement locked or non-obtained image
+        unlocked_image:
+          type: string
+          nullable: true
+          description: Achievement unlocked or obtained image
+        position:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Achievement position within project
+        public:
+          type: boolean
+          default: false
+          description: Achievement public flag
+        extra:
+          type: object
+          nullable: true
+          description: Arbitrary application data
+
+    ## Derived Achievement update response
+    AchievementUpdateResponse:
+      type: object
+      properties:
+        update_achievement_by_pk:
+          $ref: "#/components/schemas/Achievement"
+
+    ## (No "delete request" necessary for derived types)
+
+    ## Derived Achievement delete response
+    AchievementDeleteResponse:
+      type: object
+      properties:
+        delete_achievement_by_pk:
+          nullable: true
+          $ref: "#/components/schemas/Achievement"
+
+    ## (No "list request" necessary for derived types)
+
+    ## Derived Achievement list response
+    AchievementListResponse:
+      type: object
+      properties:
+        achievement:
+          type: array
+          items:
+            $ref: "#/components/schemas/Achievement"
+
+
+    ## Derived Participant create request
+    ParticipantCreateRequest:
+      type: object
+      properties:
+        project_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related project ID
+          x-tags:
+          - write-once
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Participant display name
+        external_id:
+          type: string
+          description: Participant external ID
+        image:
+          type: string
+          nullable: true
+          description: Participant image
+        extra:
+          type: object
+          nullable: true
+          description: Arbitrary application data
+
+    ## Derived Participant create response
+    ParticipantCreateResponse:
+      type: object
+      properties:
+        insert_participant_one:
+          $ref: "#/components/schemas/Participant"
+
+    ## (No "read request" or necessary for derived types)
+    ## Derived Participant read response
+    ParticipantReadResponse:
+      type: object
+      properties:
+        participant:
+          type: array
+          items:
+            $ref: "#/components/schemas/Participant"
+
+    ## Derived Participant update request
+    ParticipantUpdateRequest:
+      type: object
+      properties:
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Participant display name
+        external_id:
+          type: string
+          description: Participant external ID
+        image:
+          type: string
+          nullable: true
+          description: Participant image
+        extra:
+          type: object
+          nullable: true
+          description: Arbitrary application data
+
+    ## Derived Participant update response
+    ParticipantUpdateResponse:
+      type: object
+      properties:
+        update_participant_by_pk:
+          $ref: "#/components/schemas/Participant"
+
+    ## (No "delete request" necessary for derived types)
+
+    ## Derived Participant delete response
+    ParticipantDeleteResponse:
+      type: object
+      properties:
+        delete_participant_by_pk:
+          nullable: true
+          $ref: "#/components/schemas/Participant"
+
+    ## (No "list request" necessary for derived types)
+
+    ## Derived Participant list response
+    ParticipantListResponse:
+      type: object
+      properties:
+        participant:
+          type: array
+          items:
+            $ref: "#/components/schemas/Participant"
+
+
+    ## Derived Scoreboard create request
+    ScoreboardCreateRequest:
+      type: object
+      properties:
+        project_id:
+          type: string
+          format: ulid
+          minLength: 26
+          maxLength: 26
+          description: Related project ID
+          x-tags:
+          - write-once
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Scoreboard display name
+        rank_dir:
+          type: string
+          description: Scoreboard rank direction
+        public:
+          type: boolean
+          default: false
+          description: Scoreboard public flag
+        extra:
+          type: object
+          description: Arbitrary application data
+          nullable: true
+
+    ## Derived Scoreboard create response
+    ScoreboardCreateResponse:
+      type: object
+      properties:
+        insert_scoreboard_one:
+          $ref: "#/components/schemas/Scoreboard"
+
+    ## (No "read request" or necessary for derived types)
+    ## Derived Scoreboard read response
+    ScoreboardReadResponse:
+      type: object
+      properties:
+        scoreboard:
+          type: array
+          items:
+            $ref: "#/components/schemas/Scoreboard"
+
+    ## Derived Scoreboard update request
+    ScoreboardUpdateRequest:
+      type: object
+      properties:
+        display:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Scoreboard display name
+        rank_dir:
+          type: string
+          description: Scoreboard rank direction
+        public:
+          type: boolean
+          default: false
+          description: Scoreboard public flag
+        extra:
+          type: object
+          description: Arbitrary application data
+          nullable: true
+
+    ## Derived Scoreboard update response
+    ScoreboardUpdateResponse:
+      type: object
+      properties:
+        update_scoreboard_by_pk:
+          $ref: "#/components/schemas/Scoreboard"
+
+    ## (No "delete request" necessary for derived types)
+
+    ## Derived Scoreboard delete response
+    ScoreboardDeleteResponse:
+      type: object
+      properties:
+        delete_scoreboard_by_pk:
+          nullable: true
+          $ref: "#/components/schemas/Scoreboard"
+
+    ## (No "list request" necessary for derived types)
+
+    ## Derived Scoreboard list response
+    ScoreboardListResponse:
+      type: object
+      properties:
+        scoreboard:
+          type: array
+          items:
+            $ref: "#/components/schemas/Scoreboard"
+
+
+paths:
+  # Paths that are not easily derived from the resource types.
+
+  ## Read achievement leaderboard
+  /achievement/{achievement_id}/leaderboard:
+    get:
+      tags:
+      - achievement
+      summary: Achievement leaderboard
+      description: >
+        Reads and returns achievement leaderboard
+      operationId: achievement_leaderboard
+      parameters:
+      - name: achievement_id
+        in: path
+        description: Achievement ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        200:
+          description: Read achievement leaderboard successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchievementLeaderboardResponse'
+
+  ## Record achievement progress
+  /achievement/{achievement_id}/progress:
+    put:
+      tags:
+      - achievement
+      summary: Record achievement progress
+      description: >
+        Records and returns achievement progress
+      operationId: achievement_record
+      parameters:
+      - name: achievement_id
+        in: path
+        description: Achievement ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: Achievement progress
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AchievementProgressRequest'
+      responses:
+        200:
+          description: Record achievement progress successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchievementProgressResponse'
+
+  ## List participant progress
+  /participant/{participant_id}/progress:
+    get:
+      tags:
+      - participant
+      summary: Participant progress
+      description: >
+        Reads and returns participant progress.
+      operationId: participant_progress
+      parameters:
+      - name: participant_id
+        in: path
+        description: Participant ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        200:
+          description: Read participant progress successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantProgressResponse'
+
+
+  ## List participant scores
+  /participant/{participant_id}/scores:
+    get:
+      tags:
+      - participant
+      summary: Participant scores
+      description: >
+        Reads and returns participant scores.
+      operationId: participant_scores
+      parameters:
+      - name: participant_id
+        in: path
+        description: Participant ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        200:
+          description: Read participant scores successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantScoresResponse'
+
+  ## Record scoreboard score
+  /scoreboard/{scoreboard_id}/score:
+    put:
+      tags:
+      - scoreboard
+      summary: Record a scoreboard score
+      description: >
+        Records and returns a scoreboard score.
+      operationId: scoreboard_record
+      parameters:
+      - name: scoreboard_id
+        in: path
+        description: Scoreboard ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        description: Scoreboard score
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScoreboardScoreRequest'
+      responses:
+        200:
+          description: Record score successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreboardScoreResponse'
+
+  ## Read scoreboard scores
+  /scoreboard/{scoreboard_id}/scores:
+    get:
+      tags:
+      - scoreboard
+      summary: Scoreboard scores
+      description: >
+        Reads and returns scoreboard scores
+      operationId: scoreboard_scores
+      parameters:
+      - name: scoreboard_id
+        in: path
+        description: Scoreboard ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: from
+        in: query
+        description: From
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: to
+        in: query
+        description: To
+        required: false
+        schema:
+          type: string
+          format: date-time
+      responses:
+        200:
+          description: Read scoreboard scores successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreboardScoresResponse'
+
+  # Achievement Create and List
+  /achievement:
+    get:
+      tags:
+        - achievement
+      summary: List achievements
+      description: >
+        Reads and returns list of achievements in the given project
+      operationId: achievement_list
+      parameters:
+        - name: project_id
+          in: query
+          description: Project ID
+          required: true
+          schema:
+            type: string
+            format: ulid
+        - name: limit
+          in: query
+          description: List limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: offset
+          in: query
+          description: List offset
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: List successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchievementListResponse'
+    put:
+      tags:
+        - achievement
+      summary: Create achievement
+      description: >
+        Creates and returns achievement in the given project
+      operationId: achievement_create
+      requestBody:
+        description: Achievement to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AchievementCreateRequest'
+      responses:
+        '200':
+          description: Create successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchievementCreateResponse'
+
+  # Achievement Read, Update, and Delete
+  /achievement/{achievement_id}:
+    get:
+      tags:
+        - achievement
+      summary: Read achievement
+      description: >
+        Reads and returns achievement by achievement id
+      operationId: achievement_read
+      parameters:
+        - name: achievement_id
+          in: path
+          description: Achievement ID
+          required: true
+          schema:
+            type: string
+            format: ulid
+      responses:
+        '200':
+          description: Read successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchievementReadResponse'
+    post:
+      tags:
+        - achievement
+      summary: Update achievement
+      description: >
+        Updates and returns achievement by achievement id
+      operationId: achievement_update
+      parameters:
+        - name: achievement_id
+          in: path
+          description: Achievement ID
+          required: true
+          schema:
+            type: string
+            format: ulid
+      requestBody:
+        description: Achievement to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AchievementUpdateRequest'
+      responses:
+        '200':
+          description: Update successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchievementUpdateResponse'
+    delete:
+      tags:
+        - achievement
+      summary: Delete achievement by id.
+      description: >
+        Delete achievement by achievement id
+      operationId: achievement_delete
+      parameters:
+        - name: achievement_id
+          in: path
+          description: Achievement ID
+          required: true
+          schema:
+            type: string
+            format: ulid
+      responses:
+        '200':
+          description: Delete successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchievementDeleteResponse'
+
+    # Participant Create and List
+  /participant:
+    get:
+      tags:
+        - participant
+      summary: List participants
+      description: >
+        Reads and returns list of participants in the given project
+      operationId: participant_list
+      parameters:
+        - name: project_id
+          in: query
+          description: Project ID
+          required: true
+          schema:
+            type: string
+            format: ulid
+        - name: limit
+          in: query
+          description: List limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: offset
+          in: query
+          description: List offset
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: List successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantListResponse'
+    put:
+      tags:
+        - participant
+      summary: Create participant
+      description: >
+        Creates and returns participant in the given project
+      operationId: participant_create
+      requestBody:
+        description: Participant to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParticipantCreateRequest'
+      responses:
+        '200':
+          description: Create successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantCreateResponse'
+
+  # Participant Read, Update, and Delete
+  /participant/{participant_id}:
+    get:
+      tags:
+        - participant
+      summary: Read participant
+      description: >
+        Reads and returns participant by participant id
+      operationId: participant_read
+      parameters:
+        - name: participant_id
+          in: path
+          description: Participant ID
+          required: true
+          schema:
+            type: string
+            format: ulid
+      responses:
+        '200':
+          description: Read successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantReadResponse'
+    post:
+      tags:
+        - participant
+      summary: Update participant
+      description: >
+        Updates and returns participant by participant id
+      operationId: participant_update
+      parameters:
+        - name: participant_id
+          in: path
+          description: Participant ID
+          required: true
+          schema:
+            type: string
+            format: ulid
+      requestBody:
+        description: Participant to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParticipantUpdateRequest'
+      responses:
+        '200':
+          description: Update successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantUpdateResponse'
+    delete:
+      tags:
+        - participant
+      summary: Delete participant by id.
+      description: >
+        Delete participant by participant id
+      operationId: participant_delete
+      parameters:
+        - name: participant_id
+          in: path
+          description: Participant ID
+          required: true
+          schema:
+            type: string
+            format: ulid
+      responses:
+        '200':
+          description: Delete successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantDeleteResponse'
+
+    # Scoreboard Create and List
+  /scoreboard:
+    get:
+      tags:
+        - scoreboard
+      summary: List scoreboards
+      description: >
+        Reads and returns list of scoreboards in the given project
+      operationId: scoreboard_list
+      parameters:
+        - name: project_id
+          in: query
+          description: Project ID
+          required: true
+          schema:
+            type: string
+            format: ulid
+        - name: limit
+          in: query
+          description: List limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: offset
+          in: query
+          description: List offset
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: List successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreboardListResponse'
+    put:
+      tags:
+        - scoreboard
+      summary: Create scoreboard
+      description: >
+        Creates and returns scoreboard in the given project
+      operationId: scoreboard_create
+      requestBody:
+        description: Scoreboard to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScoreboardCreateRequest'
+      responses:
+        '200':
+          description: Create successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreboardCreateResponse'
+
+  # Scoreboard Read, Update, and Delete
+  /scoreboard/{scoreboard_id}:
+    get:
+      tags:
+        - scoreboard
+      summary: Read scoreboard
+      description: >
+        Reads and returns scoreboard by scoreboard id
+      operationId: scoreboard_read
+      parameters:
+        - name: scoreboard_id
+          in: path
+          description: Scoreboard ID
+          required: true
+          schema:
+            type: string
+            format: ulid
+      responses:
+        '200':
+          description: Read successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreboardReadResponse'
+    post:
+      tags:
+        - scoreboard
+      summary: Update scoreboard
+      description: >
+        Updates and returns scoreboard by scoreboard id
+      operationId: scoreboard_update
+      parameters:
+        - name: scoreboard_id
+          in: path
+          description: Scoreboard ID
+          required: true
+          schema:
+            type: string
+            format: ulid
+      requestBody:
+        description: Scoreboard to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScoreboardUpdateRequest'
+      responses:
+        '200':
+          description: Update successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreboardUpdateResponse'
+    delete:
+      tags:
+        - scoreboard
+      summary: Delete scoreboard by id.
+      description: >
+        Delete scoreboard by scoreboard id
+      operationId: scoreboard_delete
+      parameters:
+        - name: scoreboard_id
+          in: path
+          description: Scoreboard ID
+          required: true
+          schema:
+            type: string
+            format: ulid
+      responses:
+        '200':
+          description: Delete successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreboardDeleteResponse'
+
+  
