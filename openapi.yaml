@@ -116,10 +116,6 @@ components:
           minLength: 1
           maxLength: 255
 
-        db:
-          type: string
-          description: User database name
-
         created:
           type: string
           format: date-time
